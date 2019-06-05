@@ -1,0 +1,15 @@
+Package: reproduceR
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Maria Luiza",
+           family = "Mondelli",
+           role = c("aut", "cre"),
+           email = "malumondelli@gmail.com")
+Description: What the package does (one paragraph).
+License: What license it uses
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1.9000
+Imports:
+  devtools, packrat, zen4R, jsonlite, DBI, RSQLite, stringr, pryr, qdapRegex, dplyr, gdata
