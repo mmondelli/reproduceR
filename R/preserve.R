@@ -9,8 +9,8 @@
 #' @examples
 #' preserve()
 #' preserve(con = '~/prov.db', prov_json = '~/prov.json')
-
-preserve <- function(con = '~/prov.db', prov_json = '~/Dropbox/Artigos/2019/ER/experiment/modelr/prov_script/prov.json'){
+#/home/vagrant/R/x86_64-pc-linux-gnu-library/3.6
+preserve <- function(con = '~/prov.db', prov_json = '~/prov.json'){
   # Vagrant
   # system('apt list --installed > ~/.new_installed.log; diff ~/.installed.log ~/.new_installed.log > ~/.diff.log')
   # diff <- read.csv('~/.diff.log', sep = " ", header = F)
@@ -19,7 +19,7 @@ preserve <- function(con = '~/prov.db', prov_json = '~/Dropbox/Artigos/2019/ER/e
   # packages <- gsub("\\/.*","",diff)
   # packages <- paste('apt install -y ', packages, sep = "")
   #
-  # vagrant_file <- readLines(con = '/vagrant/Vagrantfile')
+  # vagrant_file <- readLines(con = system.file('Vagrantfile', package='reproduceR'))
   # end_vagrant_file = which(vagrant_file == "  SHELL")
   # for (p in 1:length(packages)){
   #   vagrant_file[end_vagrant_file] <- packages[p]
@@ -27,12 +27,13 @@ preserve <- function(con = '~/prov.db', prov_json = '~/Dropbox/Artigos/2019/ER/e
   # }
   # vagrant_file[end_vagrant_file] <- "  SHELL"
   # vagrant_file[end_vagrant_file+1] <- "end"
-  # writeLines(vagrant_file, con = '~/Vagrantfile')
+  # writeLines(vagrant_file, con = '~/Vagrantfile_edited')
 
   # Create db
   library(sqldf); library(DBI)
   db <- dbConnect(SQLite(), dbname=con)
-  #dbSendQueries(db, sqlFromFile("db_schema.sql"))
+  schema_file <- system.file('db_schema.sql', package='reproduceR')
+  dbSendQueries(db, sqlFromFile(schema_file))
   # Import info to db
   parserDB(db, prov_json)
   print('Finished')

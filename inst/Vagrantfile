@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/bionic64"
- 
+
   #config.ssh.username = 'root'
   #config.ssh.password = 'vagrant'
   #config.ssh.insert_key = 'true'
@@ -74,10 +74,11 @@ Vagrant.configure("2") do |config|
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
     add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
     apt-get update
-    apt install -y libcurl4-openssl-dev 
-    apt install -y build-essential 
-    apt install -y libgit2-dev 
+    apt install -y libcurl4-openssl-dev
+    apt install -y build-essential
+    apt install -y libgit2-dev
     apt install -y libssl-dev
+    apt install -y default-jdk
     apt install -y r-base-core r-recommended
     apt list --installed > .installed.log
   SHELL

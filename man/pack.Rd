@@ -7,7 +7,7 @@
 pack(pack_project = ".")
 }
 \arguments{
-\item{pack_project}{Experiment directory. Defaults to '.'.}
+\item{pack_project}{Path to experiment directory. Defaults to '.'.}
 }
 \description{
 This function allows you to package your experiment using packrat.
