@@ -22,5 +22,5 @@ pack <- function(pack_project = '.'){
   default_vagrant <- system.file('Vagrantfile', package='reproduceR')
   system(paste0('cp ',default_vagrant, ' ', pack_project))
   print("Vagrant up - this will take a few minutes")
-  system('cd ..; vagrant up --provision')
+  system(paste0('cd ',pack_project,'; vagrant up --provision'))
 }
