@@ -8,7 +8,7 @@
 #' @export
 
 ## DB connection and functions #####
-#con <- dbConnect(SQLite(), "~/er_vagrant.db")
+#con <- dbConnect(SQLite(), "~/prov_test.db")
 #con <- dbConnect(SQLite(), "/home/mluiza/Dropbox/Artigos/2019/ER/database/er_model.db")
 
 # Read prov.json
@@ -22,6 +22,7 @@ parserDB <- function(con, prov){
   ## Read prov
   prov_json <- fromJSON(prov, flatten=TRUE)
 
+  options(stringsAsFactors = FALSE)
   # Rdt entities
   rdt_entities <- names(prov_json$entity)
   get_entity_name <- function(x){ eval(parse(text=paste0('prov_json$entity$`',x,'`$`rdt:name`'))) }
@@ -156,7 +157,7 @@ parserDB <- function(con, prov){
   consumed_produced_df <- rbind(consumed_produced_df, withoutFunction) # Juntar os dfs
 
   # Get functions and package names
-  functions <- levels(droplevels(unique(consumed_produced_df$function_name)))
+  functions <- unique(consumed_produced_df$function_name)
   functions <- unique(append(functions, function_name), na.rm=TRUE)
   functions <- functions[!is.na(functions)]
   getFunctionPackage_function <- function(x){ print(x);
@@ -217,75 +218,93 @@ parserDB <- function(con, prov){
   consumed_produced_df <- merge(consumed_produced_df, activity_param)
   functions_parameters <- unique(consumed_produced_df[,c(1, 2, 9)])
 
-  # ## DB inserts #####
-  # # 0 - script
-  # dbSendQuery(con, paste0('insert into script (script_name, duration)
-  #                           values ("',script_name ,'","',script_duration,'")'))
-  # script_id <- dbGetQuery(con, 'select max(script_id) from script')
-  #
-  # # 1 - os
-  # dbSendQuery(con, paste0('insert into os (name, platform)
-  #                           values ("',os_info$V2[6] ,'","',os_info$V2[8],'")'))
-  # os_id <- dbGetQuery(con, 'select max(os_id) from os')
-  #
-  # # 2 - os_packages TODO
-  # insert_ospackages <- function(x,y){
-  #   dbSendQuery(con, paste0('insert into os_package (os_package_name, version, os_id, script_id)
-  #                           values ("', x ,'","', y ,'","',
-  #                           os_id ,'","',script_id,'")'))}
-  # insert_ospackages(package_version$V1, package_version$V2) #TODO: sapply
-  #
-  # # 3 - script_packages TODO
-  # for (i in 1:length(rdt_libs)){
-  #   script_package_name <- eval(parse(text=paste0('prov_json$entity$`',rdt_libs[i],'`$name')))
-  #   script_package_version <- eval(parse(text=paste0('prov_json$entity$`',rdt_libs[i],'`$version')))
-  #   # Insert
-  #   dbSendQuery(con, paste0('insert into script_package (script_package_name, version, os_package_id)
-  #                           values ("',script_package_name ,'","',script_package_version,'","', 2 ,'")'))
-  #   # TODO: pegar id de os_package
-  # }
-  # dbSendQuery(con, paste0('insert into script_package (script_package_name, version, os_package_id)
-  #                           values ("no package","","', 2 ,'")'))
-  #
-  # # 4 - input_output
-  # input_output <- na.omit(unique(dplyr::select(consumed_produced_df, entities, type_entity))) # unique(consumed_produced_df[, 5]))
-  # insert_input <- function(x) { dbSendQuery(con, paste0('insert into input_output (name, type) values ("', x['entities'] ,'","', x['type_entity'],'")')) }
-  # apply(X = input_output, 1, FUN = insert_input)
-  #
-  # # 5 - functions
-  # func <- unique(dplyr::select(consumed_produced_df, function_name, package))
-  # func <- func[!is.na(func$function_name),]
-  # insert_functions <- function(x) { dbSendQuery(con, paste0('insert into function (name, script_id, script_package_id)
-  #                                                           select "',x['function_name'],'", ',script_id,', script_package_id from script_package where
-  #                                                           script_package_name = "',x['package'],'"'))}
-  # apply(X = func, 1, FUN = insert_functions)
-  #
-  # # 4 - consumed
-  # c <- unique(dplyr::select(consumed_produced_df[which(consumed_produced_df$type == 'consumed'),],
-  #                    function_name, entities, param))
-  # c$function_name <- as.character(c$function_name)
-  # c$entities <- as.character(c$entities)
-  # c$param <- as.character(c$param)
-  # c$param <- gsub('\"', "'", c$param)
-  # insert_consumed <- function(x){ print(x)
-  #                                 f_id <- dbGetQuery(con, paste0('select function_id from function where name = "',x['function_name'],'"'));
-  #                                 i_id <- dbGetQuery(con, paste0('select input_output_id from input_output where name = "',x['entities'],'"'));
-  #                                 dbSendQuery(con, paste0('insert into consumed (input_id, function_id, parameters)
-  #                                                         values (',i_id,',',f_id,',"',x['param'],'")'))
-  #                                 }
-  # apply(X = c[which(!is.na(c$function_name)),], 1, FUN = insert_consumed)
-  #
-  # # 5 - produced
-  #
-  # p <- unique(dplyr::select(consumed_produced_df[which(consumed_produced_df$type == 'produced'),],
-  #                    function_name, entities))
-  #
-  # insert_produced <- function(x){ print(x)
-  #                                 f_id <- dbGetQuery(con, paste0('select function_id from function where name = "',as.character(x['function_name']),'"'))
-  #                                 i_id <- dbGetQuery(con, paste0('select input_output_id from input_output where name = "',as.character(x['entities']),'"'))
-  #                                 dbSendQuery(con, paste0('insert into produced (output_id, funtion_id)
-  #                                                         values (',i_id,',',f_id,')'))}
-  # apply(X = p, 1, FUN = insert_produced)
+  # Hardware info
+  hardware_info <- system('lshw -short', intern=T)
+  class_pos <- gregexpr(pattern ='Class',hardware_info[1])[[1]][1]
+  hardware_info <- hardware_info[-c(1,2)]
+  hardware_info <- substr(hardware_info, class_pos, 3000)
+  hardware_info <- gsub("[[:blank:]]+", " ", hardware_info)
+  class <- gsub("([A-Za-z]+).*", "\\1", hardware_info)
+  description <- trimws(sub(hardware_info, pattern = "((?:[a-z][a-z]+))", replacement = ""))
+  hw_info <- data.frame(class = class, description = description)
+  description <- as.character(paste0(class, ' - ', description))
+  description <- paste(description, collapse = ", ")
+
+  ## DB inserts #####
+  # 0 - script
+  dbSendQuery(con, paste0('insert into script (script_name, duration)
+                            values ("',script_name ,'","',script_duration,'")'))
+  script_id <- dbGetQuery(con, 'select max(script_id) from script')
+
+  # 1 - hardware
+  dbSendQuery(con, paste0('insert into hardware (description)
+                            values ("',description,'")'))
+  hw_id <- dbGetQuery(con, 'select max(hardware_id) from hardware')
+
+  # 1 - os
+  dbSendQuery(con, paste0('insert into os (name, platform, hardware_id)
+                            values ("',os_info$V2[6] ,'","',os_info$V2[8],'","',hw_id,')'))
+  os_id <- dbGetQuery(con, 'select max(os_id) from os')
+
+  # 2 - os_packages TODO
+  insert_ospackages <- function(x,y){
+    dbSendQuery(con, paste0('insert into os_package (os_package_name, version, os_id, script_id)
+                            values ("', x['V1'] ,'","', x['V2'] ,'","',
+                            os_id ,'","',script_id,'")'))}
+  #insert_ospackages(package_version$V1, package_version$V2) #TODO: sapply
+  apply(X = package_version, 1, FUN = insert_ospackages)
+
+  # 3 - script_packages TODO
+  for (i in 1:length(rdt_libs)){
+    script_package_name <- eval(parse(text=paste0('prov_json$entity$`',rdt_libs[i],'`$name')))
+    script_package_version <- eval(parse(text=paste0('prov_json$entity$`',rdt_libs[i],'`$version')))
+    # Insert
+    dbSendQuery(con, paste0('insert into script_package (script_package_name, version, os_package_id)
+                            values ("',script_package_name ,'","',script_package_version,'","', 1 ,'")'))
+    # TODO: pegar id de os_package
+  }
+  dbSendQuery(con, paste0('insert into script_package (script_package_name, version, os_package_id)
+                            values ("no package","","', 1 ,'")'))
+
+  # 4 - input_output
+  input_output <- na.omit(unique(dplyr::select(consumed_produced_df, entities, type_entity))) # unique(consumed_produced_df[, 5]))
+  insert_input <- function(x) { dbSendQuery(con, paste0('insert into input_output (name, type) values ("', x['entities'] ,'","', x['type_entity'],'")')) }
+  apply(X = input_output, 1, FUN = insert_input)
+
+  # 5 - functions
+  func <- unique(dplyr::select(consumed_produced_df, function_name, package))
+  func <- func[!is.na(func$function_name),]
+  insert_functions <- function(x) { dbSendQuery(con, paste0('insert into function (name, script_id, script_package_id)
+                                                            select "',x['function_name'],'", ',script_id,', script_package_id from script_package where
+                                                            script_package_name = "',x['package'],'"'))}
+  apply(X = func, 1, FUN = insert_functions)
+
+  # 4 - consumed
+  c <- unique(dplyr::select(consumed_produced_df[which(consumed_produced_df$type == 'consumed'),],
+                     function_name, entities, param))
+  c$function_name <- as.character(c$function_name)
+  c$entities <- as.character(c$entities)
+  c$param <- as.character(c$param)
+  c$param <- gsub('\"', "'", c$param)
+  insert_consumed <- function(x){ print(x)
+                                  f_id <- dbGetQuery(con, paste0('select function_id from function where name = "',x['function_name'],'"'));
+                                  i_id <- dbGetQuery(con, paste0('select input_output_id from input_output where name = "',x['entities'],'"'));
+                                  dbSendQuery(con, paste0('insert into consumed (input_id, function_id, parameters)
+                                                          values (',i_id,',',f_id,',"',x['param'],'")'))
+                                  }
+  apply(X = c[which(!is.na(c$function_name)),], 1, FUN = insert_consumed)
+
+  # 5 - produced
+
+  p <- unique(dplyr::select(consumed_produced_df[which(consumed_produced_df$type == 'produced'),],
+                     function_name, entities))
+
+  insert_produced <- function(x){ print(x)
+                                  f_id <- dbGetQuery(con, paste0('select function_id from function where name = "',as.character(x['function_name']),'"'))
+                                  i_id <- dbGetQuery(con, paste0('select input_output_id from input_output where name = "',as.character(x['entities']),'"'))
+                                  dbSendQuery(con, paste0('insert into produced (output_id, funtion_id)
+                                                          values (',i_id,',',f_id,')'))}
+  apply(X = p, 1, FUN = insert_produced)
   print('Finishing importing provenance to db.')
 }
 
