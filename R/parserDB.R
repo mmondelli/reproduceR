@@ -192,7 +192,7 @@ parserDB <- function(con, prov){
   os_info <- as.data.frame(do.call(rbind, os_info)); os_info
 
   # Packages
-  packages <- read.csv('/home/mondelli/Dropbox/Artigos/2019/ER/experiment/util/.diff.log', sep = " ", header = F)
+  packages <- read.csv('~/.diff.log', sep = " ", header = F)
   packages <- packages[packages$V5 == '[installed]',]
   packages <- packages[,2]
   packages <- gsub("\\/.*","",packages)
