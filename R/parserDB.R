@@ -9,7 +9,7 @@
 
 ## DB connection and functions #####
 #con <- dbConnect(SQLite(), "~/prov_test.db")
-#con <- dbConnect(SQLite(), "/home/mluiza/Dropbox/Artigos/2019/ER/database/er_model.db")
+#con <- dbConnect(SQLite(), "/home/mondelli/Dropbox/Artigos/2019/ER/database/er_model.db")
 
 # Read prov.json
 #prov_json <- fromJSON('~/Dropbox/Artigos/2019/ER/experiment/modelr/prov_script/prov.json', flatten=TRUE)
@@ -192,15 +192,19 @@ parserDB <- function(con, prov){
   os_info <- as.data.frame(do.call(rbind, os_info)); os_info
 
   # Packages
-  # packages <- read.csv('/home/mondelli/Dropbox/Artigos/2019/ER/experiment/util/.diff.log', sep = " ", header = F)
-  # packages <- packages[packages$V5 == '[installed]',]
-  # packages <- packages[,2]
-  # packages <- gsub("\\/.*","",packages)
-  #
-  # get_pkg_version <- function(x){ system(paste0("dpkg -l | grep -i ", x, " | awk -v OFS=',' '{ print $2, $3 }'"), intern = T) }
-  # package_version <-sapply(X = packages, FUN = get_pkg_version)
-  # package_version <- as.data.frame(do.call(rbind, package_version))
-  # package_version <- strsplit(as.character(package_version$V1),','); package_version <- as.data.frame(do.call(rbind, package_version))
+  packages <- read.csv('/home/mondelli/Dropbox/Artigos/2019/ER/experiment/util/.diff.log', sep = " ", header = F)
+  packages <- packages[packages$V5 == '[installed]',]
+  packages <- packages[,2]
+  packages <- gsub("\\/.*","",packages)
+
+  get_pkg_version <- function(x){ system(paste0("dpkg -l | grep -i ", x, " | awk -v OFS=',' '{ print $2, $3 }'"), intern = T) }
+  package_version <- sapply(X = packages, FUN = get_pkg_version)
+  package_version <- as.data.frame(do.call(rbind, package_version))
+  package_version <- strsplit(as.character(package_version$V1),','); package_version <- as.data.frame(do.call(rbind, package_version))
+
+  package_r <- system('apt list --installed | grep r-base/', intern = T)
+  package_r <- gsub("\\/.*","",package_r)
+  version_r <- system("dpkg -l | grep 'r-base\\s' | awk -v OFS=',' '{ print $3 }'", intern=T)
 
   # Parameters
   script_content <- readLines('~/Dropbox/Artigos/2019/ER/experiment/modelr/prov_script/scripts/script.R')
@@ -230,6 +234,9 @@ parserDB <- function(con, prov){
   description <- as.character(paste0(class, ' - ', description))
   description <- paste(description, collapse = ", ")
 
+  # User
+  user <- system("who | cut -d' ' -f1 | sort | uniq", intern = T)
+
   ## DB inserts #####
   # 0 - script
   dbSendQuery(con, paste0('insert into script (script_name, duration)
@@ -241,37 +248,45 @@ parserDB <- function(con, prov){
                             values ("',description,'")'))
   hw_id <- dbGetQuery(con, 'select max(hardware_id) from hardware')
 
-  # 1 - os
+  # 2 - os
   dbSendQuery(con, paste0('insert into os (name, platform, hardware_id)
                             values ("',os_info$V2[6] ,'","',os_info$V2[8],'","',hw_id,')'))
   os_id <- dbGetQuery(con, 'select max(os_id) from os')
 
-  # 2 - os_packages TODO
+  # 3 - user
+  dbSendQuery(con, paste0('insert into user (name, os_id)
+                          values ("',user,'",',os_id,')'))
+
+  # 4 - os_packages
   insert_ospackages <- function(x,y){
     dbSendQuery(con, paste0('insert into os_package (os_package_name, version, os_id, script_id)
                             values ("', x['V1'] ,'","', x['V2'] ,'","',
                             os_id ,'","',script_id,'")'))}
   #insert_ospackages(package_version$V1, package_version$V2) #TODO: sapply
   apply(X = package_version, 1, FUN = insert_ospackages)
+  # insert r package
+  dbSendQuery(con, paste0('insert into os_package (os_package_name, version, os_id, script_id)
+                            values ("', package_r,'","', version_r ,'","',
+                          os_id ,'","',script_id,'")'))
+  r_id <- dbGetQuery(con, paste0('select os_package_id from os_package where os_package_name like "', package_r,'"'))
 
-  # 3 - script_packages TODO
+  # 5 - script_packages
   for (i in 1:length(rdt_libs)){
     script_package_name <- eval(parse(text=paste0('prov_json$entity$`',rdt_libs[i],'`$name')))
     script_package_version <- eval(parse(text=paste0('prov_json$entity$`',rdt_libs[i],'`$version')))
     # Insert
     dbSendQuery(con, paste0('insert into script_package (script_package_name, version, os_package_id)
-                            values ("',script_package_name ,'","',script_package_version,'","', 1 ,'")'))
-    # TODO: pegar id de os_package
+                            values ("',script_package_name ,'","',script_package_version,'","', r_id ,'")'))
   }
   dbSendQuery(con, paste0('insert into script_package (script_package_name, version, os_package_id)
-                            values ("no package","","', 1 ,'")'))
+                            values ("no package","","', r_id ,'")'))
 
-  # 4 - input_output
+  # 6 - input_output
   input_output <- na.omit(unique(dplyr::select(consumed_produced_df, entities, type_entity))) # unique(consumed_produced_df[, 5]))
   insert_input <- function(x) { dbSendQuery(con, paste0('insert into input_output (name, type) values ("', x['entities'] ,'","', x['type_entity'],'")')) }
   apply(X = input_output, 1, FUN = insert_input)
 
-  # 5 - functions
+  # 7 - functions
   func <- unique(dplyr::select(consumed_produced_df, function_name, package))
   func <- func[!is.na(func$function_name),]
   insert_functions <- function(x) { dbSendQuery(con, paste0('insert into function (name, script_id, script_package_id)
