@@ -10,7 +10,7 @@
 #' preserve()
 #' preserve(con = '~/prov.db', prov_json = './prov.json')
 #/home/vagrant/R/x86_64-pc-linux-gnu-library/3.6
-preserve <- function(con = '~/prov.db', prov_json = './prov.json'){
+preserve <- function(con = '~/prov.db', prov_json = './prov_script/prov.json'){
   # Vagrant
   # system('apt list --installed > ~/.new_installed.log; diff ~/.installed.log ~/.new_installed.log > ~/.diff.log')
   # diff <- read.csv('~/.diff.log', sep = " ", header = F)
@@ -35,6 +35,6 @@ preserve <- function(con = '~/prov.db', prov_json = './prov.json'){
   schema_file <- system.file('db_schema.sql', package='reproduceR')
   dbSendQueries(db, sqlFromFile(schema_file))
   # Import info to db
-  parserDB(db, prov_json)
+  #parserDB(db, prov_json)
   print('Finished')
 }
