@@ -11,4 +11,7 @@
 validate <- function(script='script.R', dir = '.'){
   library(rdt)
   prov.run(script, dir)
+
+  preserve(script, paste0(dir, 'prov_dir'))
+
 }
