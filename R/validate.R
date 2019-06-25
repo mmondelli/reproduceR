@@ -9,7 +9,7 @@
 #' @examples
 #' validate()
 validate <- function(script='script.R', dir = '.'){
-  library(rdt)
+  library(rdt, lib.loc = '/usr/local/R/site-library/')
   prov.run(script, dir)
 
   preserve(script, paste0(dir, 'prov_dir'))
