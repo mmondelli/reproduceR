@@ -30,7 +30,7 @@ preserve <- function(con = '~/prov.db', prov_json = './prov_script/prov.json'){
   # writeLines(vagrant_file, con = '~/Vagrantfile_edited')
 
   # Create db
-  library(sqldf); library(DBI)
+  library(sqldf, lib.loc='/usr/local/lib/R/site-library/'); library(DBI, lib.loc='/usr/local/lib/R/site-library/')
   db <- dbConnect(SQLite(), dbname=con)
   schema_file <- system.file('db_schema.sql', package='reproduceR')
   dbSendQueries(db, sqlFromFile(schema_file))
