@@ -12,22 +12,21 @@
 #/home/vagrant/R/x86_64-pc-linux-gnu-library/3.6
 preserve <- function(con = '~/prov.db', prov_json = './prov_script/prov.json'){
   # Vagrant
-  # system('apt list --installed > ~/.new_installed.log; diff ~/.installed.log ~/.new_installed.log > ~/.diff.log')
-  # diff <- read.csv('~/.diff.log', sep = " ", header = F)
-  # diff <- diff[diff$V5 == '[installed]',]
-  # diff <- diff[,2]
-  # packages <- gsub("\\/.*","",diff)
-  # packages <- paste('apt install -y ', packages, sep = "")
-  #
-  # vagrant_file <- readLines(con = system.file('Vagrantfile', package='reproduceR'))
-  # end_vagrant_file = which(vagrant_file == "  SHELL")
-  # for (p in 1:length(packages)){
-  #   vagrant_file[end_vagrant_file] <- packages[p]
-  #   end_vagrant_file = end_vagrant_file + 1
-  # }
-  # vagrant_file[end_vagrant_file] <- "  SHELL"
-  # vagrant_file[end_vagrant_file+1] <- "end"
-  # writeLines(vagrant_file, con = '~/Vagrantfile_edited')
+   system('apt list --installed > ~/.new_installed.log; diff ~/.installed.log ~/.new_installed.log > ~/.diff.log')
+  diff <- read.csv('~/.diff.log', sep = " ", header = F)
+  diff <- diff[diff$V5 == '[installed]',]
+  diff <- diff[,2]
+  packages <- gsub("\\/.*","",diff)
+  packages <- paste('apt install -y ', packages, sep = "")
+  vagrant_file <- readLines(con = system.file('Vagrantfile', package='reproduceR'))
+  end_vagrant_file = which(vagrant_file == "  SHELL")
+  for (p in 1:length(packages)){
+   vagrant_file[end_vagrant_file] <- packages[p]
+   end_vagrant_file = end_vagrant_file + 1
+  }
+  vagrant_file[end_vagrant_file] <- "  SHELL"
+  vagrant_file[end_vagrant_file+1] <- "end"
+  writeLines(vagrant_file, con = '~/Vagrantfile_edited')
 
   # Create db
   library(sqldf, lib.loc='/usr/local/lib/R/site-library/'); library(DBI, lib.loc='/usr/local/lib/R/site-library/')
