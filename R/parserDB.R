@@ -17,7 +17,7 @@
 parserDB <- function(con, prov){
   ## Load libraries #####
   parserDB_lib <- c('jsonlite', 'DBI', 'RSQLite', 'stringr', 'pryr', 'qdapRegex', 'dplyr', 'gdata')
-  lapply(parserDB_lib, require, character.only = TRUE)
+  lapply(parserDB_lib, library, lib.loc='/usr/local/lib/R/site-library/', character.only = TRUE)
 
   ## Read prov
   prov_json <- fromJSON(prov, flatten=TRUE)
