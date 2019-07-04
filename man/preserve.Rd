@@ -4,8 +4,7 @@
 \alias{preserve}
 \title{Function to preserve the experiment}
 \usage{
-preserve(con = "~/prov.db",
-  prov_json = "~/Dropbox/Artigos/2019/ER/experiment/modelr/prov_script/prov.json")
+preserve(con = "~/prov.db", prov_json = "./prov_script/prov.json")
 }
 \arguments{
 \item{con}{Connection to the porvenance database}
@@ -18,7 +17,7 @@ and creating a relational database to store provenance information
 }
 \examples{
 preserve()
-preserve(con = '~/prov.db', prov_json = '~/prov.json')
+preserve(con = '~/prov.db', prov_json = './prov.json')
 }
 \keyword{preserve,}
 \keyword{provenance}
