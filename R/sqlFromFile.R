@@ -1,7 +1,8 @@
-#' Functions to create the provenance database
+#' Function to read sql from file
 #'
-#' This contains the necessary functions to create the database file based on
-#' the model decribed on db_schema.sql
+#' This contains the function that will read the sql file
+#' with instructions to create the database and split into
+#' various sql instructions. (DBI::dbSendQuery() does not accept multiple instructions)
 #' @param con Connection to the provenance database
 #' @param file File with the schema definition (sql file)
 #' @keywords database, sql, creation

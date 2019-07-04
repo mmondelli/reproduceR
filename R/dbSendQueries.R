@@ -1,13 +1,13 @@
-#' Functions to create the provenance database
+#' Function to send sql queries to the provenance database
 #'
-#' This contains the necessary functions to create the database file based on
-#' the model decribed on db_schema.sql
+#' This contains the function to send sql queries to create
+#' the provenance database on the model decribed on db_schema.sql.
 #' @param con Connection to the provenance database
-#' @param file File with the schema definition (sql file)
+#' @param sql SQL query
 #' @keywords database, sql, creation
 #' @export
 
-dbSendQueries <- function(con,sql){
-  send <- function(sql,con){ DBI::dbSendQuery(con,sql) }
-  lapply(sql,send,con)
+dbSendQueries <- function(con, sql){
+  send <- function(sql, con){ DBI::dbSendQuery(con,sql) }
+  lapply(sql, send, con)
 }
