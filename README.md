@@ -74,7 +74,7 @@ select * from input_output;
 ```
 # Step 3: Publishing
 
-The publication of the experiment involves gathering the packaged experiment and provenance (including the relational database) and compressing it to send to Zenodo, the general-purpose open-access repository for research data.
+The publication of the experiment involves gathering the packaged experiment, the provenance (including the relational database) and a new Vagrantfile and compressing it to send to Zenodo, the general-purpose open-access repository for research data.
 
 Before publishing the experiment, you must [create a token in Zenodo](https://zenodo.org/account/settings/applications/tokens/new/) and inform it as a parameter to the function.
 
@@ -83,3 +83,7 @@ Then you can execute the function:
 ```
 reproduceR::publish(<your_token>)
 ```
+
+## Additional information
+
+
