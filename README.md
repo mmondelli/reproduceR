@@ -35,7 +35,7 @@ Running this function may take a few minutes, and when done, the virtual machine
 
 **1. Access the VM:** Through the Linux terminal (or Power shell in Windows), you must access the directory of the experiment. You will see a Vagrantfile now located in this directory. This file contains the configuration of the VM created with the pack() function, but you do not have to worry about it, unless you prefer to change some specification. Within the directory you must run ```vagrant ssh``` to access the machine.
 
-**2. Copy the packaged experiment to /home:** Vagrant creates a directory in the VM (/vagrant) that is shared with the directory in the local machine where Vagrant was started (/<experiment directory>). Thus, any changes made to /vagrant will be reflected in the local directory. Therefore, we advise you to copy the experiment that was packaged in the previous step to the /home of the VM. For example: 
+**2. Copy the packaged experiment to /home:** Vagrant creates a directory in the VM (/vagrant) that is shared with the directory in the local machine where Vagrant was started (/&lt;experiment directory&gt;). Thus, any changes made to /vagrant will be reflected in the local directory. Therefore, we advise you to copy the experiment that was packaged in the previous step to the /home of the VM. For example: 
 
 ```
 cp /vagrant/<experiment dir>/packrat/bundles/<experiment>.tar.gz /home/vagrant
@@ -53,6 +53,7 @@ packrat::unbundle(bundle='<experiment>.tar.gz', where='.')
 ```
 
 This will take a few minutes, depending on the number of packages that have to be installed.
+Note: If any dependency has not been resolved (as suggested in 3), installing packages in this step with packrat may fail at some point. You should quit R, resolve the dependecy, access the experiment directory created in the VM, execute R and type ```packrat::restore()```. Packrat will continue to install the packages from where it stopped.
 
 # Step 2: Validating
 
@@ -85,5 +86,10 @@ reproduceR::publish(<your_token>)
 ```
 
 ## Additional information
+
+* The libs and applications already provided by the VM (in this package) are: default-jdk, libcurl4-openssl-dev, build-essential, libgit2-dev, libssl-dev, libxml2-dev, r-base-core, r-recommended
+
+* Also, devtools and reproduceR R packages are already installed (to load them into R, you can inform the location: lib.loc='/usr/local/lib/R/site-library/')
+
 
 
