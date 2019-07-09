@@ -192,15 +192,18 @@ parserDB <- function(con, prov){
   os_info <- as.data.frame(do.call(rbind, os_info)); os_info
 
   # Packages
-  packages <- read.csv('~/.diff.log', sep = " ", header = F)
-  packages <- packages[packages$V5 == '[installed]',]
-  packages <- packages[,2]
-  packages <- gsub("\\/.*","",packages)
+  lines_diff <- system('wc -l ~/.diff.log')
+  if (lines_diff > 0){
+    packages <- read.csv('~/.diff.log', sep = " ", header = F)
+    packages <- packages[packages$V5 == '[installed]',]
+    packages <- packages[,2]
+    packages <- gsub("\\/.*","",packages)
 
-  get_pkg_version <- function(x){ system(paste0("dpkg -l | grep -i ", x, " | awk -v OFS=',' '{ print $2, $3 }'"), intern = T) }
-  package_version <- sapply(X = packages, FUN = get_pkg_version)
-  package_version <- as.data.frame(do.call(rbind, package_version))
-  package_version <- strsplit(as.character(package_version$V1),','); package_version <- as.data.frame(do.call(rbind, package_version))
+    get_pkg_version <- function(x){ system(paste0("dpkg -l | grep -i ", x, " | awk -v OFS=',' '{ print $2, $3 }'"), intern = T) }
+    package_version <- sapply(X = packages, FUN = get_pkg_version)
+    package_version <- as.data.frame(do.call(rbind, package_version))
+    package_version <- strsplit(as.character(package_version$V1),','); package_version <- as.data.frame(do.call(rbind, package_version))
+  }
 
   package_r <- system('apt list --installed | grep r-base-core/', intern = T)
   package_r <- gsub("\\/.*","",package_r)
@@ -263,7 +266,9 @@ parserDB <- function(con, prov){
                             values ("', x['V1'] ,'","', x['V2'] ,'","',
                             os_id ,'","',script_id,'")'))}
   #insert_ospackages(package_version$V1, package_version$V2) #TODO: sapply
-  apply(X = package_version, 1, FUN = insert_ospackages)
+  if (lines_diff > 0){
+    apply(X = package_version, 1, FUN = insert_ospackages)
+  }
   # insert r package
   dbSendQuery(con, paste0('insert into os_package (os_package_name, version, os_id, script_id)
                             values ("', package_r,'","', version_r ,'","',

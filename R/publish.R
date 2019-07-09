@@ -29,6 +29,8 @@ publish <- function(token, title = 'My publication title',
                     prov_db = '~/prov.db'){
   #install_github("eblondel/zen4R")
   require(zen4R, lib.loc = '/usr/local/lib/R/site-library/')
+  require(curl, lib.loc = '/usr/local/lib/R/site-library/')
+  require(mime, lib.loc = '/usr/local/lib/R/site-library/')
   require(digest)
 
   time_md5 <- digest(as.character(Sys.time()), "md5", serialize = FALSE)

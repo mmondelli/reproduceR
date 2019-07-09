@@ -82,12 +82,12 @@ Before publishing the experiment, you must [create a token in Zenodo](https://ze
 Then you can execute the function:
 
 ```
-reproduceR::publish(<your_token>)
+reproduceR::publish(token=<your_token>, bundle=<packaged experiment>, prov_dir=<provenance dir>)
 ```
 
 ## Additional information
 
-* The libs and applications already provided by the VM (in this package) are: default-jdk, libcurl4-openssl-dev, build-essential, libgit2-dev, libssl-dev, libxml2-dev, r-base-core, r-recommended
+* The libs and applications already provided by the VM (in this package) are: default-jdk, libcurl4-openssl-dev, build-essential, libgit2-dev, libssl-dev, libxml2-dev, r-base-core, r-recommended, sqlite3
 
 * Also, devtools and reproduceR R packages are already installed (to load them into R, you can inform the location: lib.loc='/usr/local/lib/R/site-library/')
 

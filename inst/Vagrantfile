@@ -77,8 +77,10 @@ Vagrant.configure("2") do |config|
     apt install -y libcurl4-openssl-dev
     apt install -y build-essential
     apt install -y libgit2-dev
-    apt install -y libssl-dev 
-    apt install -y libxml2-dev   
+    apt install -y libssl-dev
+    apt install -y libxml2-dev
+    apt install -y default-jdk
+    apt install -y sqlite3
     apt install -y r-base-core r-recommended
     R -e "install.packages('devtools')"
     R -e "library('devtools'); install_github(c('mmondelli/reproduceR', 'eblondel/zen4R')); options('download.file.method'='libcurl'); install_github('End-to-end-provenance/rdt')"
