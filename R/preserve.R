@@ -38,6 +38,6 @@ preserve <- function(con = '~/prov.db', prov_json = './prov_script/prov.json'){
   schema_file <- system.file('db_schema.sql', package='reproduceR')
   dbSendQueries(db, sqlFromFile(schema_file))
   # Import info to db
-  #parserDB(db, prov_json)
+  parserDB(db, prov_json)
   print('Finished')
 }
