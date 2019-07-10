@@ -13,6 +13,6 @@ validate <- function(script='script.R', dir = '.'){
   library(jsonlite, lib.loc = '/usr/local/lib/R/site-library/')
   prov.run(script, dir)
 
-  preserve(script, paste0(dir, 'prov_dir'))
+  preserve(con = '~/prov.db', prov_json = './prov_script/prov.json')
 
 }
